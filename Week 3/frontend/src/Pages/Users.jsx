@@ -37,18 +37,34 @@ function Users() {
   };
 
   // GET USERS
+
   const getUsers = async () => {
-    try {
-      const res = await fetch(API);
+  try {
+    const res = await fetch(API);
+    const data = await res.json();
 
-      const data = await res.json();
+    console.log("API RESPONSE:", data);
 
-      setUsers(data);
+    // FORCE ARRAY SAFETY
+    setUsers(Array.isArray(data) ? data : []);
 
-    } catch (error) {
-      console.log(error);
-    }
-  };
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//   const getUsers = async () => {
+//     try {
+//       const res = await fetch(API);
+
+//       const data = await res.json();
+
+//       setUsers(data);
+
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center p-6">
