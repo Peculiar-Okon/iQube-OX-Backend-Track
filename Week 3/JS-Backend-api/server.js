@@ -2,11 +2,13 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const connectDB = require("./Config/db");
+const errorHandler = require("./Middleware/errorMiddleware");
 
 const userRoutes = require("./Routes/UserRoutes");
 
 app.use(cors());
 app.use(express.json());
+app.use(errorHandler);
 
 app.use("/api", userRoutes);
 connectDB();
