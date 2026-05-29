@@ -18,6 +18,45 @@ const getBoards = async (req, res) => {
   }
 };
 
+const updateBoard = async (
+  req,
+  res
+) => {
+  try {
+    const board =
+      await boardService.updateBoard(
+        req.params.id,
+        req.body
+      );
+
+    res.json(board);
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+const deleteBoard = async (
+  req,
+  res
+) => {
+  try {
+    await boardService.deleteBoard(
+      req.params.id
+    );
+
+    res.json({
+      message:
+        "Board deleted",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
 module.exports = {
   createBoard,
   getBoards,

@@ -17,7 +17,10 @@ const boardRoutes = require("./routes/boardRoutes");
 const listRoutes =
   require("./routes/listRoutes");
 
+const taskRoutes =
+  require("./routes/taskRoutes");
 
+app.use("/api/tasks", taskRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
