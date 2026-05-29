@@ -12,9 +12,15 @@ const connectDB = require("./config/db");
 connectDB();
 
 const app = express();
+const boardRoutes = require("./routes/boardRoutes");
+
+const listRoutes =
+  require("./routes/listRoutes");
 
 
+app.use("/api/lists", listRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/boards", boardRoutes);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
