@@ -4,7 +4,7 @@ const dotenv = require("dotenv");
 const authRoutes = require(
   "./routes/authRoutes"
 );
-
+const boardRoutes = require("./routes/boardRoutes");
 dotenv.config();
 
 const connectDB = require("./config/db");
@@ -12,7 +12,7 @@ const connectDB = require("./config/db");
 connectDB();
 
 const app = express();
-const boardRoutes = require("./routes/boardRoutes");
+
 
 const listRoutes =
   require("./routes/listRoutes");
@@ -20,13 +20,14 @@ const listRoutes =
 const taskRoutes =
   require("./routes/taskRoutes");
 
+
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use("/api/tasks", taskRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Trello backend running");

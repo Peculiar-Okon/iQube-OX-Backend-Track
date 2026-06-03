@@ -8,11 +8,6 @@ const getBoards = async () => {
   return await Board.find();
 };
 
-module.exports = {
-  createBoard,
-  getBoards,
-};
-
 const updateBoard = async (
   id,
   data

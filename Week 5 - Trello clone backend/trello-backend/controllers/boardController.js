@@ -60,4 +60,6 @@ const deleteBoard = async (
 module.exports = {
   createBoard,
   getBoards,
+  updateBoard,
+  deleteBoard,
 };
