@@ -5,6 +5,9 @@ const authRoutes = require(
   "./routes/authRoutes"
 );
 const boardRoutes = require("./routes/boardRoutes");
+const errorHandler =
+  require("./middleware/errorMiddleware");
+  
 dotenv.config();
 
 const connectDB = require("./config/db");
@@ -28,6 +31,7 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/boards", boardRoutes);
+app.use(errorHandler);
 
 app.get("/", (req, res) => {
   res.send("Trello backend running");
