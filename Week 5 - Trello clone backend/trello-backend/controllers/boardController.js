@@ -1,15 +1,6 @@
 const boardService = require("../services/boardService");
 const sendResponse = require("../utils/response");
 
-// const createBoard = async (req, res) => {
-//   try {
-//     const board = await boardService.createBoard(req.body);
-//     res.status(201).json(board);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
-
 const createBoard = async (req, res, next) => {
   try {
     const board = await boardService.createBoard(req.body);
@@ -26,15 +17,6 @@ const createBoard = async (req, res, next) => {
 
   }
 };
-
-// const getBoards = async (req, res) => {
-//   try {
-//     const boards = await boardService.getBoards();
-//     res.json(boards);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// };
 
 const getBoards = async (req, res, next) => {
   try {
@@ -71,27 +53,6 @@ const updateBoard = async (req, res, next) => {
   }
 };
 
-// const updateBoard = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     const board =
-//       await boardService.updateBoard(
-//         req.params.id,
-//         req.body
-//       );
-
-//     return sendResponse(res, {
-//       data: board,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       message: err.message,
-//     });
-//   }
-// };
-
 const deleteBoard = async (req, res, next) => {
   try {
 
@@ -109,33 +70,6 @@ const deleteBoard = async (req, res, next) => {
 
   }
 };
-
-// const deleteBoard = async (
-//   req,
-//   res
-// ) => {
-//   try {
-
-
-// const deleteBoard = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     await boardService.deleteBoard(
-//       req.params.id
-//     );
-
-//     res.json({
-//       message:
-//         "Board deleted",
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       message: err.message,
-//     });
-//   }
-// };
 
 const getFullBoard = async (req, res, next) => {
   try {
@@ -156,27 +90,6 @@ const getFullBoard = async (req, res, next) => {
 
   }
 };
-
-// const getFullBoard = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     const result =
-//       await boardService.getFullBoard(
-//         req.params.id
-//       );
-
-//     res.status(200).json(result);
-
-//   } catch (error) {
-
-//     res.status(500).json({
-//       message: error.message,
-//     });
-
-//   }
-// };
 
 module.exports = {
   createBoard,

@@ -8,8 +8,15 @@ const {
   "../controllers/authController"
 );
 
+const validateUser =
+  require(
+    "../middleware/validateUser"
+  );
+
+
 router.post(
   "/register",
+  validateUser,
   register
 );
 

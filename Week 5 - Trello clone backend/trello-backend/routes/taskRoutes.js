@@ -11,7 +11,14 @@ const {
   "../controllers/taskController"
 );
 
-router.post("/",
+const validateTask =
+  require(
+    "../middleware/validateTask"
+  );
+
+router.post(
+  "/",
+  validateTask,
   createTask
 );
 

@@ -5,32 +5,6 @@ const sendResponse = require("../utils/Response");
 const taskService =
   require("../services/taskService");
 
-// const moveTask = async (req, res) => {
-//   try {
-//     const { listId, position } = req.body;
-//     const { id } = req.params;
-
-//         // validate ObjectId first
-//     if (!mongoose.Types.ObjectId.isValid(id)) {
-//       return res.status(400).json({
-//         message: "Invalid task ID format",
-//       });
-//     }
-
-//     const task = await taskService.moveTask(
-//       req.params.id,
-//       listId,
-//       position
-//     );
-
-//     res.json(task);
-//   } catch (err) {
-//     res.status(500).json({
-//       message: err.message,
-//     });
-//   }
-// };
-
 const moveTask = async (
   req,
   res,
@@ -103,24 +77,6 @@ const createTask = async (
   }
 };
 
-// const createTask = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     const task =
-//       await taskService.createTask(
-//         req.body
-//       );
-
-//     res.status(201).json(task);
-//   } catch (err) {
-//     res.status(500).json({
-//       message: err.message,
-//     });
-//   }
-// };
-
 const getTasksByList = async (
   req,
   res,
@@ -145,24 +101,6 @@ const getTasksByList = async (
 
   }
 };
-
-// const getTasksByList = async (
-//   req,
-//   res
-// ) => {
-//   try {
-//     const tasks =
-//       await taskService.getTasksByList(
-//         req.params.listId
-//       );
-
-//     res.json(tasks);
-//   } catch (err) {
-//     res.status(500).json({
-//       message: err.message,
-//     });
-//   }
-// };
 
 module.exports = {
   createTask,

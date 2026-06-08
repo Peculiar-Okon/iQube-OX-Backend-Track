@@ -9,7 +9,16 @@ const {
   "../controllers/listController"
 );
 
-router.post("/", createList);
+const validateList =
+  require(
+    "../middleware/validateList"
+  );
+
+router.post(
+  "/",
+  validateList,
+  createList
+);
 
 router.get(
   "/:boardId",
