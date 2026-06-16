@@ -1,6 +1,10 @@
 const Task =
   require("../models/Task");
 
+  const List = require("../models/List");
+  const AppError =
+    require("../utils/AppErrors");
+
 const moveTask = async (
   taskId,
   newListId,
@@ -9,7 +13,7 @@ const moveTask = async (
   const task = await Task.findById(taskId);
 
   if (!task) {
-    throw new Error("Task not found");
+    throw new AppError("Task not found", 404);
   }
 
   const oldListId = task.listId;
@@ -49,16 +53,73 @@ const createTask = async (
   return await Task.create(data);
 };
 
-const getTasksByList = async (
-  listId
-) => {
-  return await Task.find({
+// const getTasksByList = async (
+//   listId
+// ) => {
+//   return await Task.find({
+//     listId,
+//   });
+// };
+
+const getTasksByList = async (listId, page = 1, limit = 10) => {
+
+    const skip = (page - 1) * limit;
+
+  return await Task.find({ listId })
+    .skip(skip)
+    .limit(limit);
+
+  const list = await List.findById(listId);
+
+  if (!list) {
+    throw new AppError("List not found", 404);
+  }
+
+  const tasks = await Task.find({
     listId,
-  });
+  }).skip((page - 1) * limit).limit(limit);
+
+  return tasks;
 };
+
+const updateTask = async (
+  taskId,
+  data
+) => {
+
+  return await Task.findByIdAndUpdate(
+    taskId,
+    data,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+};
+
+const getTasks = async () => {
+  return await Task.find();
+};
+
+const deleteTask = async (id) => {
+  const task = await Task.findByIdAndDelete(id);
+
+  if (!task) {
+    throw new AppError("Task not found", 404);
+  }
+
+  return task;
+};
+
+
+
 
 module.exports = {
   createTask,
   getTasksByList,
   moveTask,
+  updateTask,
+  deleteTask,
+  getTasks,
 };

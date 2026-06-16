@@ -8,11 +8,13 @@ const {
   createBoard,
   getBoards,
   updateBoard,
+  getBoardById,
   deleteBoard,
   getFullBoard,
 } = require("../controllers/boardController");
 
 router.post("/", validateBoard, createBoard);
+router.get("/:id", getBoardById);
 router.get("/", getBoards);
 router.put("/:id", updateBoard);
 router.delete("/:id", deleteBoard);

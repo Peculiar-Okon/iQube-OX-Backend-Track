@@ -5,6 +5,8 @@ const router = express.Router();
 const {
   createList,
   getListsByBoard,
+  getLists,
+  deleteList
 } = require(
   "../controllers/listController"
 );
@@ -21,8 +23,19 @@ router.post(
 );
 
 router.get(
+  "/",
+  getLists
+);
+
+router.get(
   "/:boardId",
   getListsByBoard
+);
+
+router.delete(
+  "/:id",
+  protect,
+  deleteList
 );
 
 module.exports = router;

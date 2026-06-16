@@ -77,33 +77,119 @@ const createTask = async (
   }
 };
 
+// const getTasksByList = async (
+//   req,
+//   res,
+//   next
+// ) => {
+//   try {
+
+//     const tasks =
+//       await taskService.getTasksByList(
+//         req.params.listId
+//       );
+
+//     return sendResponse(res, {
+//       message:
+//         "Tasks fetched successfully",
+//       data: tasks,
+//     });
+
+//   } catch (err) {
+
+//     next(err);
+
+//   }
+// };
+
+
 const getTasksByList = async (
   req,
-  res,
-  next
+  res
 ) => {
   try {
 
+    const page = req.query.page || 1;
+    const limit = req.query.limit || 10;
+
     const tasks =
       await taskService.getTasksByList(
-        req.params.listId
+        req.params.listId,
+        page,
+        limit
       );
 
-    return sendResponse(res, {
+    res.status(200).json({
       message:
         "Tasks fetched successfully",
       data: tasks,
     });
 
+  } catch (error) {
+
+    res.status(404).json({
+      message: error.message,
+    });
+
+  }
+};
+
+
+const updateTask = async (req, res, next) => {
+  try {
+
+    const updatedTask =
+      await taskService.updateTask(
+        req.params.id,
+        req.body
+      );
+
+    if (!updatedTask) {
+      throw new AppError("Task not found", 404);
+    }
+
+    return sendResponse(res, {
+      message: "Task updated successfully",
+      data: updatedTask,
+    });
+
   } catch (err) {
-
     next(err);
+  }
+};
 
+const deleteTask = async (req, res, next) => {
+  try {
+
+    await taskService.deleteTask(
+      req.params.id
+    );
+
+    return sendResponse(res, {
+      message: "Task deleted successfully",
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getTasks = async (req, res) => {
+  try {
+    const tasks = await taskService.getTasks();
+    res.status(200).json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 module.exports = {
   createTask,
   getTasksByList,
-  moveTask
+  moveTask,
+  getTasks,
+  updateTask,
+  deleteTask,
 };

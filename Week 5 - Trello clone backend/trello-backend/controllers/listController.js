@@ -12,7 +12,8 @@ const createList = async (
 
     const list =
       await listService.createList(
-        req.body
+        req.body,
+        req.user.id
       );
 
     return sendResponse(res, {
@@ -28,26 +29,110 @@ const createList = async (
   }
 };
 
+const getLists = async (
+  req,
+  res
+) => {
+  try {
+
+    const lists =
+      await listService.getLists();
+
+    res.status(200).json(lists);
+
+  } catch (error) {
+
+    res.status(500).json({
+      message: error.message,
+    });
+
+  }
+};
+
+// const getListsByBoard = async (
+//   req,
+//   res,
+//   next
+// ) => {
+//   try {
+
+//     const lists =
+//       await listService.getListsByBoard(
+//         req.params.boardId
+//       );
+
+//     return sendResponse(res, {
+//       message: "Lists fetched successfully",
+//       data: lists,
+//     });
+
+//   } catch (err) {
+
+//     next(err);
+
+//   }
+// };
+
 const getListsByBoard = async (
+  req,
+  res
+) => {
+  try {
+
+    const lists =
+      await listService.getListsByBoard(
+        req.params.boardId,
+        req.user.id
+      );
+
+    res.status(200).json({
+      message:
+        "Lists fetched successfully",
+      data: lists,
+    });
+
+  } catch (error) {
+
+    res.status(404).json({
+      message: error.message,
+    });
+
+  }
+};
+
+const getallLists = async (req, res, next) => {
+  try {
+    const lists = await listService.getallLists();
+    return sendResponse(res, {
+      message: "All lists fetched successfully",
+      data: lists,
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const deleteList = async (
   req,
   res,
   next
 ) => {
   try {
 
-    const lists =
-      await listService.getListsByBoard(
-        req.params.boardId
-      );
+    await listService.deleteList(
+      req.params.id,
+      req.user.id
+    );
 
-    return sendResponse(res, {
-      message: "Lists fetched successfully",
-      data: lists,
+    res.status(200).json({
+      success: true,
+      message:
+        "List deleted successfully",
     });
 
-  } catch (err) {
+  } catch (error) {
 
-    next(err);
+    next(error);
 
   }
 };
@@ -55,4 +140,6 @@ const getListsByBoard = async (
 module.exports = {
   createList,
   getListsByBoard,
+  getLists,
+  deleteList,
 };
