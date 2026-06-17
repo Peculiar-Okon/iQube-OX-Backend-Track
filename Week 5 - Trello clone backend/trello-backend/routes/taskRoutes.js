@@ -1,4 +1,5 @@
 const express = require("express");
+const protect  = require("../middleware/authMiddleware");
 
 const router =
   express.Router();
@@ -22,20 +23,22 @@ const validateTask =
 router.post(
   "/",
   validateTask,
+  protect,
   createTask
 );
 
-router.put("/:id", updateTask);
+router.put("/:id", protect, updateTask);
 
-router.delete("/:id", deleteTask);
+router.delete("/:id", protect, deleteTask);
 
 router.get(
   "/:listId",
+  protect,
   getTasksByList
 );
 
-router.get("/", getTasks);
+router.get("/", protect, getTasks);
 
-router.put("/:id/move", moveTask);
+router.put("/:id/move", protect, moveTask);
 
 module.exports = router;

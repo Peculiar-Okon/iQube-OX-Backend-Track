@@ -61,23 +61,49 @@ const createTask = async (
 //   });
 // };
 
-const getTasksByList = async (listId, page = 1, limit = 10) => {
-
-    const skip = (page - 1) * limit;
-
-  return await Task.find({ listId })
-    .skip(skip)
-    .limit(limit);
+const getTasksByList = async (
+  listId,
+  query
+) => {
 
   const list = await List.findById(listId);
 
   if (!list) {
-    throw new AppError("List not found", 404);
+    throw new AppError(
+      "List not found",
+      404
+    );
   }
 
-  const tasks = await Task.find({
+  const page =
+    Number(query.page) || 1;
+
+  const limit =
+    Number(query.limit) || 10;
+
+  const skip =
+    (page - 1) * limit;
+
+  const filter = {
     listId,
-  }).skip((page - 1) * limit).limit(limit);
+  };
+
+  if (query.status) {
+    filter.status =
+      query.status;
+  }
+
+  if (query.search) {
+    filter.title = {
+      $regex: query.search,
+      $options: "i",
+    };
+  }
+
+  const tasks =
+    await Task.find(filter)
+      .skip(skip)
+      .limit(limit);
 
   return tasks;
 };
@@ -111,9 +137,6 @@ const deleteTask = async (id) => {
 
   return task;
 };
-
-
-
 
 module.exports = {
   createTask,

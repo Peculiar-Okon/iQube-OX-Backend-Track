@@ -115,8 +115,7 @@ const getTasksByList = async (
     const tasks =
       await taskService.getTasksByList(
         req.params.listId,
-        page,
-        limit
+        req.query
       );
 
     res.status(200).json({

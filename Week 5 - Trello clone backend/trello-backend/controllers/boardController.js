@@ -100,18 +100,36 @@ const getBoard = async (
 };
 
 // UPDATE BOARD
+// const updateBoard = async (req, res, next) => {
+//   try {
+//     const board = await boardService.updateBoard(
+//       req.params.id,
+//       req.body,
+//       req.user.id
+//     );
+
+//     return sendResponse(res, {
+//       statusCode: 200,
+//       success: true,
+//       message: "Board updated successfully",
+//       data: board,
+//     });
+
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const updateBoard = async (req, res, next) => {
   try {
     const board = await boardService.updateBoard(
       req.params.id,
-      req.body,
-      req.user.id
+      req.user.id,
+      req.body
     );
 
-    return sendResponse(res, {
-      statusCode: 200,
+    res.status(200).json({
       success: true,
-      message: "Board updated successfully",
       data: board,
     });
 

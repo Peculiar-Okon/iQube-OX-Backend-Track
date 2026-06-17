@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const  protect  = require("../middleware/authMiddleware");
 
 const validateBoard =
   require("../middleware/validateBoard");
@@ -14,10 +15,10 @@ const {
 } = require("../controllers/boardController");
 
 router.post("/", validateBoard, createBoard);
-router.get("/:id", getBoardById);
-router.get("/", getBoards);
-router.put("/:id", updateBoard);
-router.delete("/:id", deleteBoard);
-router.get("/:id/full", getFullBoard);
+router.get("/:id", protect, getBoardById);
+router.get("/", protect, getBoards);
+router.put("/:id", protect, updateBoard);
+router.delete("/:id", protect, deleteBoard);
+router.get("/:id/full", protect, getFullBoard);
 
 module.exports = router;

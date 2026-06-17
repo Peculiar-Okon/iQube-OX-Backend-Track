@@ -1,4 +1,5 @@
 const express = require("express");
+const  protect  = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -19,16 +20,19 @@ const validateList =
 router.post(
   "/",
   validateList,
+  protect,
   createList
 );
 
 router.get(
   "/",
+  protect,
   getLists
 );
 
 router.get(
   "/:boardId",
+  protect,
   getListsByBoard
 );
 

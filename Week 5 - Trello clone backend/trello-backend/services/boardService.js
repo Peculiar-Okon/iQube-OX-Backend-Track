@@ -22,6 +22,8 @@ const getBoardById = async (
   userId
 ) => {
 
+  
+
   const board =
     await Board.findOne({
       _id: boardId,
@@ -38,19 +40,37 @@ const getBoardById = async (
   return board;
 };
 
-const updateBoard = async (
-  boardId,
-  userId,
-  data
-) => {
-  return await Board.findByIdAndUpdate(
-  {
-    _id: boardId,
-    owner: userId,
-  },
-  updateData,
+// const updateBoard = async (
+//   boardId,
+//   userId,
+//   updateData
+// ) => {
+//   return await Board.findByIdAndUpdate(
+//   {
+//     _id: boardId,
+//     owner: userId,
+//   },
+//   updateData,
+//     { new: true }
+//   );
+// };
+
+const updateBoard = async (boardId, userId, updateData) => {
+
+  const board = await Board.findOneAndUpdate(
+    {
+      _id: boardId,
+      owner: userId,
+    },
+    { $set: updateData }, 
     { new: true }
   );
+
+  if (!board) {
+    throw new AppError("Board not found", 404);
+  }
+
+  return board;
 };
 
 // const deleteBoard = async (
@@ -61,7 +81,7 @@ const updateBoard = async (
 //   );
 // };
 
-const deleteBoard = async (boardId) => {
+const deleteBoard = async (boardId, userId) => {
 
   // 1. find all lists under board
   const lists = await List.find({
@@ -93,19 +113,70 @@ const deleteBoard = async (boardId) => {
 
 const mongoose = require("mongoose");
 
-const getFullBoard = async (boardId, userId) => {
+// const getFullBoard = async (boardId, userId) => {
 
-  if (!mongoose.Types.ObjectId.isValid(boardId)) {
-    throw new AppError("Invalid board ID", 400);
+//   if (!mongoose.Types.ObjectId.isValid(boardId)) {
+//     throw new AppError("Invalid board ID", 400);
+//   }
+
+//   const board = await Board.findById(boardId) ({
+//   _id: boardId,
+//   owner: userId,
+// });
+
+//   if (!board) {
+//     throw new AppError("Board not found", 404);
+//   }
+
+//   const lists = await List.find({
+//     boardId: board._id,
+//   });
+
+//   const listsWithTasks = [];
+
+//   for (const list of lists) {
+//     const tasks = await Task.find({
+//       listId: list._id,
+//     });
+
+//     listsWithTasks.push({
+//       ...list.toObject(),
+//       tasks,
+//     });
+//   }
+
+//   return {
+//     board,
+//     lists: listsWithTasks,
+//   };
+// };
+
+const getFullBoard = async (
+  boardId,
+  userId
+) => {
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      boardId
+    )
+  ) {
+    throw new AppError(
+      "Invalid board ID",
+      400
+    );
   }
 
-  const board = await Board.findById(boardId) ({
-  _id: boardId,
-  owner: userId,
-});
+  const board = await Board.findOne({
+    _id: boardId,
+    owner: userId,
+  });
 
   if (!board) {
-    throw new AppError("Board not found", 404);
+    throw new AppError(
+      "Board not found",
+      404
+    );
   }
 
   const lists = await List.find({
@@ -115,6 +186,7 @@ const getFullBoard = async (boardId, userId) => {
   const listsWithTasks = [];
 
   for (const list of lists) {
+
     const tasks = await Task.find({
       listId: list._id,
     });
@@ -123,12 +195,14 @@ const getFullBoard = async (boardId, userId) => {
       ...list.toObject(),
       tasks,
     });
+
   }
 
   return {
     board,
     lists: listsWithTasks,
   };
+
 };
 
 module.exports = {
