@@ -2,29 +2,42 @@ const boardService = require("../services/boardService");
 const sendResponse = require("../utils/response");
 
 // CREATE BOARD
-const createBoard = async (req, res, next) => {
-  try {
-   const title = req.body?.title;
-const owner = req.body?.owner;
 
-    if (!title || !owner) {
+const createBoard = async (
+  req,
+  res,
+  next
+) => {
+  try {
+
+    // console.log("REQ USER:", req.user);
+    // console.log("USER ID:", req.user?._id);
+    // console.log("BODY:", req.body);
+
+    const { title, description } =
+      req.body;
+
+    if (!title) {
       return sendResponse(res, {
         statusCode: 400,
         success: false,
-        message: "Title and owner are required",
+        message: "Title is required",
         data: null,
       });
     }
 
-    const board = await boardService.createBoard({
-      title,
-      owner,
-    });
+    const board =
+      await boardService.createBoard({
+        title,
+        description,
+        owner: req.user._id,
+      });
 
     return sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: "Board created successfully",
+      message:
+        "Board created successfully",
       data: board,
     });
 
@@ -33,17 +46,28 @@ const owner = req.body?.owner;
   }
 };
 
+
 // GET ALL BOARDS
 const getBoards = async (req, res, next) => {
+
   try {
-    const boards = await boardService.getBoards();
+    //     console.log("USER:", req.user);
+    // console.log(
+    //   "USER ID:",
+    //   req.user._id
+    // );
+    const boards = await boardService.getBoards(
+       req.user._id
+    );
 
     return sendResponse(res, {
       statusCode: 200,
       success: true,
       message: "Boards fetched successfully",
       data: boards,
+      
     });
+
 
   } catch (error) {
     next(error);
@@ -53,7 +77,7 @@ const getBoards = async (req, res, next) => {
 // GET BOARD BY ID
 const getBoardById = async (req, res, next) => {
   try {
-    const board = await boardService.getBoardById(req.params.id, req.user.id);
+    const board = await boardService.getBoardById(req.params.id, req.user._id);
 
     if (!board) {
       return sendResponse(res, {
@@ -86,7 +110,7 @@ const getBoard = async (
     const board =
       await boardService.getBoardById(
         req.params.id,
-        req.user.id
+        req.user._id
       );
 
     res.status(200).json({
@@ -99,32 +123,11 @@ const getBoard = async (
   }
 };
 
-// UPDATE BOARD
-// const updateBoard = async (req, res, next) => {
-//   try {
-//     const board = await boardService.updateBoard(
-//       req.params.id,
-//       req.body,
-//       req.user.id
-//     );
-
-//     return sendResponse(res, {
-//       statusCode: 200,
-//       success: true,
-//       message: "Board updated successfully",
-//       data: board,
-//     });
-
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 const updateBoard = async (req, res, next) => {
   try {
     const board = await boardService.updateBoard(
       req.params.id,
-      req.user.id,
+      req.user._id,
       req.body
     );
 
@@ -138,28 +141,11 @@ const updateBoard = async (req, res, next) => {
   }
 };
 
-// DELETE BOARD
-// const deleteBoard = async (req, res, next) => {
-//   try {
-//     await boardService.deleteBoard(req.params.id);
-
-//     return sendResponse(res, {
-//       statusCode: 200,
-//       success: true,
-//       message: "Board deleted successfully",
-//       data: null,
-//     });
-
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 const deleteBoard = async (req, res) => {
   try {
     await boardService.deleteBoard(
       req.params.id,
-      req.user.id
+      req.user._id
     );
 
     res.json({
@@ -176,7 +162,7 @@ const deleteBoard = async (req, res) => {
 // GET FULL BOARD (boards + lists + tasks)
 const getFullBoard = async (req, res, next) => {
   try {
-    const result = await boardService.getFullBoard(req.params.id, req.user.id);
+    const result = await boardService.getFullBoard(req.params.id, req.user._id);
 
     return sendResponse(res, {
       statusCode: 200,

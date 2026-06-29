@@ -5,18 +5,22 @@ const Task = require("../models/Task");
 const AppError =
   require("../utils/AppErrors");
 
-// const createList = async (data) => {
-//   const board = await Board.findById(data.boardId);
-//   if (!board) {
-//     throw new AppError("Board not found", 404);
-//   }
-//   return await List.create(data);
-// };
 
 const createList = async (
   data,
   userId
 ) => {
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      data.boardId
+    )
+  ) {
+    throw new AppError(
+      "Invalid board ID",
+      400
+    );
+  }
 
   const board =
     await Board.findOne({
@@ -34,32 +38,27 @@ const createList = async (
   return await List.create(data);
 };
 
-// const getListsByBoard = async (
-//   boardId
+// const createList = async (
+//   data,
+//   userId
 // ) => {
 
-//   if (
-//     !mongoose.Types.ObjectId.isValid(
-//       boardId
-//     )
-//   ) {
-//     throw new AppError("Invalid board ID", 400);
-//   }
-
 //   const board =
-//     await Board.findById(boardId);
-
-//   if (!board) {
-//     throw new AppError("Board not found", 404);
-//   }
-
-//   const lists =
-//     await List.find({
-//       boardId,
+//     await Board.findOne({
+//       _id: data.boardId,
+//       owner: userId,
 //     });
 
-//   return lists;
+//   if (!board) {
+//     throw new AppError(
+//       "Board not found or access denied",
+//       404
+//     );
+//   }
+
+//   return await List.create(data);
 // };
+
 
 const getListsByBoard = async (
   boardId,
@@ -100,23 +99,21 @@ const getLists = async () => {
   return await List.find();
 };
 
-// const deleteList = async (listId) => {
-
-//   // delete all tasks inside list
-//   await Task.deleteMany({
-//     listId,
-//   });
-
-//   // delete list
-//   return await List.findByIdAndDelete(
-//     listId
-//   );
-// };
-
 const deleteList = async (
   listId,
   userId
 ) => {
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      listId
+    )
+  ) {
+    throw new AppError(
+      "Invalid list ID",
+      400
+    );
+  }
 
   const list =
     await List.findById(listId);
@@ -141,12 +138,10 @@ const deleteList = async (
     );
   }
 
-  // delete all tasks inside list
   await Task.deleteMany({
     listId,
   });
 
-  // delete list
   return await List.findByIdAndDelete(
     listId
   );

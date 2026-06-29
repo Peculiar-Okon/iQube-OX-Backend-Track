@@ -14,11 +14,13 @@ const {
   getFullBoard,
 } = require("../controllers/boardController");
 
+router.use(protect);
+
 router.post("/", validateBoard, createBoard);
-router.get("/:id", protect, getBoardById);
-router.get("/", protect, getBoards);
-router.put("/:id", protect, updateBoard);
-router.delete("/:id", protect, deleteBoard);
-router.get("/:id/full", protect, getFullBoard);
+router.get("/:id", getBoardById);
+router.get("/", getBoards);
+router.put("/:id", updateBoard);
+router.delete("/:id", deleteBoard);
+router.get("/:id/full", getFullBoard);
 
 module.exports = router;

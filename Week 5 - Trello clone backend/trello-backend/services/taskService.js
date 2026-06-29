@@ -47,19 +47,42 @@ const moveTask = async (
   return task;
 };
 
+const mongoose =
+  require("mongoose");
+
 const createTask = async (
   data
 ) => {
-  return await Task.create(data);
+
+  if (
+    !mongoose.Types.ObjectId.isValid(
+      data.listId
+    )
+  ) {
+    throw new AppError(
+      "Invalid list ID",
+      400
+    );
+  }
+
+  const list =
+    await List.findById(
+      data.listId
+    );
+
+  if (!list) {
+    throw new AppError(
+      "List not found",
+      404
+    );
+  }
+
+  return await Task.create(
+    data
+  );
 };
 
-// const getTasksByList = async (
-//   listId
-// ) => {
-//   return await Task.find({
-//     listId,
-//   });
-// };
+
 
 const getTasksByList = async (
   listId,

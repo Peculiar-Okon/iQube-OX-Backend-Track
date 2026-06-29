@@ -7,6 +7,11 @@ const boardSchema = new mongoose.Schema(
       required: true,
     },
 
+      description: {
+      type: String,
+      required: false,
+    },
+
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

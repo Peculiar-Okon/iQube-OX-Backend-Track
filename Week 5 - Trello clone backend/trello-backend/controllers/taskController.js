@@ -77,31 +77,6 @@ const createTask = async (
   }
 };
 
-// const getTasksByList = async (
-//   req,
-//   res,
-//   next
-// ) => {
-//   try {
-
-//     const tasks =
-//       await taskService.getTasksByList(
-//         req.params.listId
-//       );
-
-//     return sendResponse(res, {
-//       message:
-//         "Tasks fetched successfully",
-//       data: tasks,
-//     });
-
-//   } catch (err) {
-
-//     next(err);
-
-//   }
-// };
-
 
 const getTasksByList = async (
   req,

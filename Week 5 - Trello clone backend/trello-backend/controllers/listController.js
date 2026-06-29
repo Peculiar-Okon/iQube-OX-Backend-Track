@@ -13,7 +13,7 @@ const createList = async (
     const list =
       await listService.createList(
         req.body,
-        req.user.id
+        req.user._id
       );
 
     return sendResponse(res, {
@@ -49,29 +49,7 @@ const getLists = async (
   }
 };
 
-// const getListsByBoard = async (
-//   req,
-//   res,
-//   next
-// ) => {
-//   try {
 
-//     const lists =
-//       await listService.getListsByBoard(
-//         req.params.boardId
-//       );
-
-//     return sendResponse(res, {
-//       message: "Lists fetched successfully",
-//       data: lists,
-//     });
-
-//   } catch (err) {
-
-//     next(err);
-
-//   }
-// };
 
 const getListsByBoard = async (
   req,
@@ -82,7 +60,7 @@ const getListsByBoard = async (
     const lists =
       await listService.getListsByBoard(
         req.params.boardId,
-        req.user.id
+        req.user._id
       );
 
     res.status(200).json({
@@ -121,7 +99,7 @@ const deleteList = async (
 
     await listService.deleteList(
       req.params.id,
-      req.user.id
+      req.user._id
     );
 
     res.status(200).json({
