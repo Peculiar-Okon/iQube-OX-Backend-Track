@@ -1,12 +1,17 @@
+require("dotenv").config();
+
 const express = require("express");
 const cors = require("cors");
-const dotenv = require("dotenv");
+
 const authRoutes = require(
   "./routes/authRoutes"
 );
 const boardRoutes = require("./routes/boardRoutes");
-  
-dotenv.config();
+
+
+
+console.log(process.env.EMAIL_USER);
+console.log(process.env.EMAIL_PASS);
 
 const connectDB = require("./config/db");
 

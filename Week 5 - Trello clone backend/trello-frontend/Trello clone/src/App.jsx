@@ -4,11 +4,15 @@ import {
   Route,
 } from "react-router-dom";
 
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Board from "./pages/Board";
-import CreateBoard from "./pages/CreateBoard";
+import Login from "./Pages/Login";
+import Register from "./Pages/Register";
+import Dashboard from "./Pages/Dashboard";
+import Board from "./Pages/Board";
+import CreateBoard from "./Pages/CreateBoard";
+import VerifyEmail from "./Pages/VerifyEmail";
+import ForgotPassword from "./Pages/ForgotPassword";
+import VerifyResetOTP from "./Pages/VerifyResetOTP";
+import ResetPassword from "./Pages/ResetPassword";
 
 function App() {
   return (
@@ -27,8 +31,33 @@ function App() {
         />
 
         <Route
+          path="/register"
+          element={<Register />}
+        />
+
+        <Route
           path="/dashboard"
           element={<Dashboard />}
+        />
+
+        <Route
+          path="/verify-email"
+          element={<VerifyEmail />}
+        />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword />}
+        />
+
+        <Route
+          path="/verify-reset-otp"
+          element={<VerifyResetOTP />}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword />}
         />
 
         <Route

@@ -125,10 +125,20 @@ const getTasksByList = async (
 
   const tasks =
     await Task.find(filter)
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-  return tasks;
+  const totalTasks =
+    await Task.countDocuments(filter);
+
+  return {
+    data: tasks,
+    limit,
+    page,
+    next: page * limit < totalTasks ? page + 1 : null,
+    total: totalTasks,
+  };
 };
 
 const updateTask = async (

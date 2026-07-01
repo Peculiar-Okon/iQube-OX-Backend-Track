@@ -18,6 +18,27 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+        isVerified: {
+      type: Boolean,
+      default: false,
+    },
+
+    verificationOTP: {
+      type: String,
+    },
+
+    verificationOTPExpires: {
+      type: Date,
+    },
+
+    passwordResetOTP: {
+  type: String,
+},
+
+passwordResetOTPExpires: {
+  type: Date,
+},
+
     role: {
       type: String,
       enum: ["user", "admin"],

@@ -7,6 +7,7 @@ const {
   createList,
   getListsByBoard,
   getLists,
+  updateList,
   deleteList
 } = require(
   "../controllers/listController"
@@ -22,6 +23,12 @@ router.post(
   validateList,
   protect,
   createList
+);
+
+router.put(
+  "/:id",
+  protect,
+  updateList
 );
 
 router.get(

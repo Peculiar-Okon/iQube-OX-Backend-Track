@@ -90,6 +90,29 @@ const getallLists = async (req, res, next) => {
   }
 };
 
+const updateList = async (
+  req,
+  res,
+  next
+) => {
+  try {
+    const updatedList =
+      await listService.updateList(
+        req.params.id,
+        req.body,
+        req.user._id
+      );
+
+    return res.status(200).json({
+      success: true,
+      message: "List updated successfully",
+      data: updatedList,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const deleteList = async (
   req,
   res,
@@ -119,5 +142,6 @@ module.exports = {
   createList,
   getListsByBoard,
   getLists,
+  updateList,
   deleteList,
 };

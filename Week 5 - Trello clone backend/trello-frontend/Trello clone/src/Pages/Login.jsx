@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useTheme } from "../Theme/themeContext.jsx";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
+import { loginUser } from "../Services/authService";
 
 function Login() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -12,6 +14,7 @@ function Login() {
   });
 
   const [loading, setLoading] = useState(false);
+  const successMessage = location.state?.message;
 
 
   const handleChange = (e) => {
@@ -27,39 +30,16 @@ function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        "http://localhost:5000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const { data } = await loginUser(formData);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Login failed");
-        setLoading(false);
-        return;
-      }
-
-      // Save JWT
       localStorage.setItem("token", data.token);
-
-      alert("Login successful 🎉");
-
-      // Redirect to dashboard
       navigate("/dashboard");
-
     } catch (err) {
-      console.log(err);
-      alert("Server error");
+      const message = err?.response?.data?.message || "Login failed";
+      alert(message);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -100,6 +80,12 @@ function Login() {
         border border-slate-100 dark:border-slate-800
         p-8
       ">
+
+        {successMessage && (
+          <div className="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
+            {successMessage}
+          </div>
+        )}
 
         {/* Header */}
         <div className="text-center mb-8">
@@ -157,6 +143,12 @@ function Login() {
                 focus:outline-none focus:ring-2 focus:ring-blue-500
               "
             />
+          </div>
+
+          <div className="text-right text-sm text-slate-500 dark:text-slate-400">
+            <Link to="/forgot-password" className="text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+              Forgot password?
+            </Link>
           </div>
 
           {/* Button */}

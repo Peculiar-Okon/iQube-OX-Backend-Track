@@ -87,7 +87,7 @@ const getTasksByList = async (
     const page = req.query.page || 1;
     const limit = req.query.limit || 10;
 
-    const tasks =
+    const paginationResult =
       await taskService.getTasksByList(
         req.params.listId,
         req.query
@@ -96,7 +96,7 @@ const getTasksByList = async (
     res.status(200).json({
       message:
         "Tasks fetched successfully",
-      data: tasks,
+      ...paginationResult,
     });
 
   } catch (error) {
