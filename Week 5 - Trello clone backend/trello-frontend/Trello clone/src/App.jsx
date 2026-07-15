@@ -13,10 +13,12 @@ import VerifyEmail from "./Pages/VerifyEmail";
 import ForgotPassword from "./Pages/ForgotPassword";
 import VerifyResetOTP from "./Pages/VerifyResetOTP";
 import ResetPassword from "./Pages/ResetPassword";
+import { ToastProvider } from "./components/ToastProvider";
 
 function App() {
   return (
-    <BrowserRouter>
+    <ToastProvider>
+      <BrowserRouter>
 
       <Routes>
 
@@ -72,7 +74,8 @@ function App() {
 
       </Routes>
 
-    </BrowserRouter>
+      </BrowserRouter>
+    </ToastProvider>
   );
 }
 

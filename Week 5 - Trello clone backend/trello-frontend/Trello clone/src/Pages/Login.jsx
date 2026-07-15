@@ -2,11 +2,13 @@ import { useState } from "react";
 import { useTheme } from "../Theme/themeContext.jsx";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { loginUser } from "../Services/authService";
+import { useToast } from "../components/ToastProvider";
 
 function Login() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -33,10 +35,15 @@ function Login() {
       const { data } = await loginUser(formData);
 
       localStorage.setItem("token", data.token);
+      showToast({
+        type: "success",
+        title: "Login successful",
+        message: "Welcome back! Redirecting to your dashboard.",
+      });
       navigate("/dashboard");
     } catch (err) {
       const message = err?.response?.data?.message || "Login failed";
-      alert(message);
+      showToast({ type: "error", title: "Login failed", message });
     } finally {
       setLoading(false);
     }

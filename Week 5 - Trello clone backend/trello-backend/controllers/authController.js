@@ -155,11 +155,9 @@ exports.login = async (
     } = req.body;
 
 
-  if (!email || !password) {
-    return res.status(400).json({
-      message: "Email and password are required",
-    });
-  }
+    if (!email || !password) {
+      return next(new AppError("Email and password are required", 400));
+    }
 
 
     const result =
@@ -173,11 +171,7 @@ exports.login = async (
     );
 
   } catch (err) {
-
-    res.status(400).json({
-      message: err.message,
-    });
-
+    next(err);
   }
 };
 

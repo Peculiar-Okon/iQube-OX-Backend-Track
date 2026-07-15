@@ -80,12 +80,10 @@ const createTask = async (
 
 const getTasksByList = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
-
-    const page = req.query.page || 1;
-    const limit = req.query.limit || 10;
 
     const paginationResult =
       await taskService.getTasksByList(
@@ -93,18 +91,18 @@ const getTasksByList = async (
         req.query
       );
 
-    res.status(200).json({
-      message:
-        "Tasks fetched successfully",
-      ...paginationResult,
+    return res.status(200).json({
+      success: true,
+      message: "Tasks fetched successfully",
+      data: paginationResult.data,
+      limit: paginationResult.limit,
+      page: paginationResult.page,
+      next: paginationResult.next,
+      total: paginationResult.total,
     });
 
   } catch (error) {
-
-    res.status(404).json({
-      message: error.message,
-    });
-
+    next(error);
   }
 };
 
@@ -148,14 +146,17 @@ const deleteTask = async (req, res, next) => {
   }
 };
 
-const getTasks = async (req, res) => {
+const getTasks = async (req, res, next) => {
   try {
     const tasks = await taskService.getTasks();
-    res.status(200).json(tasks);
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Tasks fetched successfully",
+      data: tasks,
     });
+  } catch (error) {
+    next(error);
   }
 };
 

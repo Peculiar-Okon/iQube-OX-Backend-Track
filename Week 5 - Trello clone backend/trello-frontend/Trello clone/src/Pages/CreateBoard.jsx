@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "../Theme/themeContext";
+import { useToast } from "../components/ToastProvider";
 
 function CreateBoard() {
   const navigate =
@@ -12,6 +13,7 @@ function CreateBoard() {
 
   const { theme } =
     useTheme();
+  const { showToast } = useToast();
 
   const [title, setTitle] =
     useState("");
@@ -62,16 +64,20 @@ function CreateBoard() {
           await res.json();
 
         if (!res.ok) {
-          alert(
-            data.message
-          );
+          showToast({
+            type: "error",
+            title: "Unable to create board",
+            message: data.message || "Please try again.",
+          });
 
           return;
         }
 
-        alert(
-          "Board created 🎉"
-        );
+        showToast({
+          type: "success",
+          title: "Board created",
+          message: "Your new board is ready to use.",
+        });
 
         navigate(
           "/dashboard"
@@ -80,9 +86,11 @@ function CreateBoard() {
       } catch (error) {
         console.log(error);
 
-        alert(
-          "Something went wrong"
-        );
+        showToast({
+          type: "error",
+          title: "Something went wrong",
+          message: "We could not create the board right now.",
+        });
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,6 @@
 const boardService = require("../services/boardService");
-const sendResponse = require("../utils/response");
+const sendResponse = require("../utils/Response");
+const AppError = require("../utils/AppErrors");
 
 // CREATE BOARD
 
@@ -141,21 +142,20 @@ const updateBoard = async (req, res, next) => {
   }
 };
 
-const deleteBoard = async (req, res) => {
+const deleteBoard = async (req, res, next) => {
   try {
     await boardService.deleteBoard(
       req.params.id,
       req.user._id
     );
 
-    res.json({
-      message:
-        "Board + nested data deleted",
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Board + nested data deleted",
     });
   } catch (err) {
-    res.status(500).json({
-      message: err.message,
-    });
+    next(err);
   }
 };
 

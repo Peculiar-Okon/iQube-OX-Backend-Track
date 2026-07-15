@@ -12,11 +12,13 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTheme } from "../Theme/themeContext";
+import { useToast } from "../components/ToastProvider";
 
 function Board() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const { showToast } = useToast();
 
   const [board, setBoard] = useState(null);
   const [lists, setLists] = useState([]);
@@ -26,6 +28,8 @@ function Board() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalListId, setModalListId] = useState(null);
   const [taskForm, setTaskForm] = useState({ title: "", description: "", priority: "Medium", dueDate: "", tags: "" });
+  const [editModal, setEditModal] = useState({ open: false, type: null, item: null, listId: null, form: { title: "", description: "" } });
+  const [confirmModal, setConfirmModal] = useState({ open: false, title: "", message: "", onConfirm: null });
 
   const token = localStorage.getItem("token");
 
@@ -64,7 +68,13 @@ function Board() {
     try {
       const res = await api(`/tasks/${listId}`);
       const data = await res.json();
-      setTasksByList((prev) => ({ ...prev, [listId]: data.data || [] }));
+      const normalizedTasks = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.data)
+          ? data.data.data
+          : [];
+
+      setTasksByList((prev) => ({ ...prev, [listId]: normalizedTasks }));
     } catch (error) {
       console.error(error);
     }
@@ -95,8 +105,10 @@ function Board() {
       });
       setNewListTitle("");
       getLists();
+      showToast({ type: "success", title: "List created", message: "Your new list is ready." });
     } catch (error) {
       console.error(error);
+      showToast({ type: "error", title: "Unable to create list", message: "Please try again." });
     }
   };
 
@@ -140,122 +152,208 @@ function Board() {
         ),
       }));
       closeTaskModal();
+      showToast({ type: "success", title: "Task added", message: "Your task is now on the board." });
     } catch (error) {
       console.error(error);
+      showToast({ type: "error", title: "Unable to add task", message: "Please try again." });
     }
   };
 
-  const editBoard = async () => {
-    const title = prompt("Board title:", board?.title || "");
-    if (title === null || !title.trim()) return;
+  const openEditModal = (type, item, listId = null) => {
+    const form =
+      type === "board"
+        ? { title: item?.title || "", description: item?.description || "" }
+        : type === "list"
+          ? { title: item?.title || "", description: "" }
+          : { title: item?.title || "", description: item?.description || "" };
 
-    const description = prompt("Board description:", board?.description || "");
-    if (description === null) return;
-
-    try {
-      const res = await api(`/boards/${boardId}`, {
-        method: "PUT",
-        body: JSON.stringify({ title: title.trim(), description: description.trim() }),
-      });
-      const data = await res.json();
-      setBoard(data.data || data);
-    } catch (error) {
-      console.error(error);
-    }
+    setEditModal({ open: true, type, item, listId, form });
   };
 
-  const deleteBoard = async () => {
-    if (!confirm("Delete this board? This will remove all lists and tasks.")) return;
-
-    try {
-      await api(`/boards/${boardId}`, {
-        method: "DELETE",
-      });
-      navigate("/dashboard");
-    } catch (error) {
-      console.error(error);
-    }
+  const closeEditModal = () => {
+    setEditModal({ open: false, type: null, item: null, listId: null, form: { title: "", description: "" } });
   };
 
-  const editList = async (list) => {
-    const title = prompt("List title:", list.title);
-    if (title === null || !title.trim()) return;
-
-    const trimmedTitle = title.trim();
-    if (trimmedTitle === list.title) return;
-
-    try {
-      const res = await api(`/lists/${list._id}`, {
-        method: "PUT",
-        body: JSON.stringify({ title: trimmedTitle }),
-      });
-      const data = await res.json();
-      setLists((prev) => prev.map((item) => (item._id === list._id ? data.data || item : item)));
-    } catch (error) {
-      console.error(error);
-    }
+  const openConfirmModal = (title, message, onConfirm) => {
+    setConfirmModal({ open: true, title, message, onConfirm });
   };
 
-  const deleteList = async (listId) => {
-    if (!confirm("Delete this list? Tasks inside it will also be removed.")) return;
-
-    try {
-      await api(`/lists/${listId}`, {
-        method: "DELETE",
-      });
-      setLists((prev) => prev.filter((list) => list._id !== listId));
-      setTasksByList((prev) => {
-        const next = { ...prev };
-        delete next[listId];
-        return next;
-      });
-    } catch (error) {
-      console.error(error);
-    }
+  const closeConfirmModal = () => {
+    setConfirmModal({ open: false, title: "", message: "", onConfirm: null });
   };
 
-  const editTask = async (task, listId) => {
-    const title = prompt("Task title:", task.title);
-    if (title === null || !title.trim()) return;
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
 
-    const description = prompt("Task description:", task.description || "");
-    if (description === null) return;
+    if (!editModal.open) return;
 
-    const trimmedTitle = title.trim();
-    const trimmedDescription = description.trim();
-    if (trimmedTitle === task.title && trimmedDescription === (task.description || "")) return;
+    const { type, item, listId } = editModal;
+
+    if (type === "board") {
+      const trimmedTitle = editModal.form.title.trim();
+      const trimmedDescription = editModal.form.description.trim();
+      if (!trimmedTitle) {
+        showToast({ type: "error", title: "Board title required", message: "Please enter a board title." });
+        return;
+      }
+
+      if (trimmedTitle === item?.title && trimmedDescription === (item?.description || "")) {
+        closeEditModal();
+        return;
+      }
+
+      try {
+        const res = await api(`/boards/${boardId}`, {
+          method: "PUT",
+          body: JSON.stringify({ title: trimmedTitle, description: trimmedDescription }),
+        });
+        const data = await res.json();
+        setBoard(data.data || data);
+        closeEditModal();
+        showToast({ type: "success", title: "Board updated", message: "The board details were saved." });
+      } catch (error) {
+        console.error(error);
+        showToast({ type: "error", title: "Unable to update board", message: "Please try again." });
+      }
+      return;
+    }
+
+    if (type === "list") {
+      const trimmedTitle = editModal.form.title.trim();
+      if (!trimmedTitle) {
+        showToast({ type: "error", title: "List title required", message: "Please enter a list title." });
+        return;
+      }
+
+      if (trimmedTitle === item?.title) {
+        closeEditModal();
+        return;
+      }
+
+      try {
+        const res = await api(`/lists/${item._id}`, {
+          method: "PUT",
+          body: JSON.stringify({ title: trimmedTitle }),
+        });
+        const data = await res.json();
+        setLists((prev) => prev.map((list) => (list._id === item._id ? data.data || list : list)));
+        closeEditModal();
+        showToast({ type: "success", title: "List updated", message: "The list title was changed." });
+      } catch (error) {
+        console.error(error);
+        showToast({ type: "error", title: "Unable to update list", message: "Please try again." });
+      }
+      return;
+    }
+
+    const trimmedTitle = editModal.form.title.trim();
+    const trimmedDescription = editModal.form.description.trim();
+    if (!trimmedTitle) {
+      showToast({ type: "error", title: "Task title required", message: "Please enter a task title." });
+      return;
+    }
+
+    if (trimmedTitle === item?.title && trimmedDescription === (item?.description || "")) {
+      closeEditModal();
+      return;
+    }
 
     try {
-      const res = await api(`/tasks/${task._id}`, {
+      const res = await api(`/tasks/${item._id}`, {
         method: "PUT",
         body: JSON.stringify({ title: trimmedTitle, description: trimmedDescription }),
       });
       const data = await res.json();
       setTasksByList((prev) => ({
         ...prev,
-        [listId]: prev[listId].map((item) =>
-          item._id === task._id ? data.data || item : item
-        ),
+        [listId]: prev[listId].map((task) => (task._id === item._id ? data.data || task : task)),
       }));
+      closeEditModal();
+      showToast({ type: "success", title: "Task updated", message: "The task details were saved." });
     } catch (error) {
       console.error(error);
+      showToast({ type: "error", title: "Unable to update task", message: "Please try again." });
     }
   };
 
-  const deleteTask = async (taskId, listId) => {
-    if (!confirm("Delete this task?")) return;
+  const editBoard = () => {
+    openEditModal("board", board);
+  };
 
-    try {
-      await api(`/tasks/${taskId}`, {
-        method: "DELETE",
-      });
-      setTasksByList((prev) => ({
-        ...prev,
-        [listId]: (prev[listId] || []).filter((task) => task._id !== taskId),
-      }));
-    } catch (error) {
-      console.error(error);
-    }
+  const deleteBoard = async () => {
+    openConfirmModal(
+      "Delete board?",
+      "This will remove all lists and tasks from this board.",
+      async () => {
+        try {
+          await api(`/boards/${boardId}`, {
+            method: "DELETE",
+          });
+          closeConfirmModal();
+          showToast({ type: "success", title: "Board deleted", message: "The board was removed." });
+          navigate("/dashboard");
+        } catch (error) {
+          console.error(error);
+          showToast({ type: "error", title: "Unable to delete board", message: "Please try again." });
+        }
+      }
+    );
+  };
+
+  const editList = (list) => {
+    openEditModal("list", list);
+  };
+
+  const deleteList = (listId) => {
+    openConfirmModal(
+      "Delete list?",
+      "Tasks inside this list will also be removed.",
+      async () => {
+        try {
+          await api(`/lists/${listId}`, {
+            method: "DELETE",
+          });
+          setLists((prev) => prev.filter((list) => list._id !== listId));
+          setTasksByList((prev) => {
+            const next = { ...prev };
+            delete next[listId];
+            return next;
+          });
+          closeConfirmModal();
+          showToast({ type: "success", title: "List deleted", message: "The list was removed." });
+        } catch (error) {
+          console.error(error);
+          showToast({ type: "error", title: "Unable to delete list", message: "Please try again." });
+        }
+      }
+    );
+  };
+
+  const editTask = (task, listId) => {
+    openEditModal("task", task, listId);
+  };
+
+  const deleteTask = (taskId, listId) => {
+    openConfirmModal(
+      "Delete task?",
+      "This action cannot be undone.",
+      async () => {
+        try {
+          await api(`/tasks/${taskId}`, {
+            method: "DELETE",
+          });
+          setTasksByList((prev) => ({
+            ...prev,
+            [listId]: (prev[listId] || []).filter((task) => task._id !== taskId),
+          }));
+          closeConfirmModal();
+          showToast({ type: "success", title: "Task deleted", message: "The task was removed." });
+        } catch (error) {
+          console.error(error);
+          showToast({ type: "error", title: "Unable to delete task", message: "Please try again." });
+        }
+      }
+    );
   };
 
   const isDark = theme === "dark";
@@ -435,6 +533,78 @@ function Board() {
               <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
                 <button onClick={closeTaskModal} className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancel</button>
                 <button onClick={addTask} className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5">Create Task</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editModal.open && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeEditModal} />
+            <div className="relative z-10 w-full max-w-xl rounded-[2rem] bg-white p-6 shadow-2xl dark:bg-slate-900">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm uppercase tracking-[0.3em] text-blue-600">Edit {editModal.type}</p>
+                  <h2 className="mt-2 text-2xl font-semibold text-slate-900 dark:text-white">Update {editModal.type === "board" ? "board details" : editModal.type === "list" ? "the list" : "the task"}</h2>
+                </div>
+                <button onClick={closeEditModal} className="rounded-2xl border border-slate-200 px-4 py-2 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Close</button>
+              </div>
+
+              <form onSubmit={handleEditSubmit} className="mt-6 space-y-4">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    {editModal.type === "board" ? "Board title" : editModal.type === "list" ? "List title" : "Task title"}
+                  </label>
+                  <input
+                    value={editModal.form.title}
+                    onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, title: e.target.value } }))}
+                    className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                    placeholder={editModal.type === "board" ? "Board title" : editModal.type === "list" ? "List title" : "Task title"}
+                  />
+                </div>
+
+                {editModal.type === "board" ? (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Board description</label>
+                    <textarea
+                      value={editModal.form.description}
+                      onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, description: e.target.value } }))}
+                      rows={4}
+                      className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      placeholder="Describe this board"
+                    />
+                  </div>
+                ) : editModal.type === "task" ? (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-slate-700 dark:text-slate-300">Task description</label>
+                    <textarea
+                      value={editModal.form.description}
+                      onChange={(e) => setEditModal((prev) => ({ ...prev, form: { ...prev.form, description: e.target.value } }))}
+                      rows={4}
+                      className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white"
+                      placeholder="Task description"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                  <button type="button" onClick={closeEditModal} className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancel</button>
+                  <button type="submit" className="rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5">Save changes</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {confirmModal.open && (
+          <div className="fixed inset-0 z-[70] flex items-center justify-center px-4 py-6">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={closeConfirmModal} />
+            <div className="relative z-10 w-full max-w-md rounded-[2rem] bg-white p-6 shadow-2xl dark:bg-slate-900">
+              <h2 className="text-xl font-semibold text-slate-900 dark:text-white">{confirmModal.title}</h2>
+              <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">{confirmModal.message}</p>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
+                <button type="button" onClick={closeConfirmModal} className="rounded-3xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800">Cancel</button>
+                <button type="button" onClick={() => confirmModal.onConfirm?.()} className="rounded-3xl bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700">Confirm</button>
               </div>
             </div>
           </div>

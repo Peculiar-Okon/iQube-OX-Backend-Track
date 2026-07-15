@@ -3,10 +3,12 @@ import { useTheme } from "../Theme/themeContext.jsx";
 import { Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { registerUser } from "../Services/authService";
+import { useToast } from "../components/ToastProvider";
 
 function Register() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -55,12 +57,16 @@ function Register() {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/;
 
     if (!passwordRegex.test(formData.password)) {
-      alert("Password must include uppercase, lowercase, a number, and a special character");
+      showToast({
+        type: "error",
+        title: "Weak password",
+        message: "Use uppercase, lowercase, a number, and a special character.",
+      });
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      showToast({ type: "error", title: "Passwords do not match", message: "Please re-enter the same password." });
       return;
     }
 
@@ -73,10 +79,15 @@ function Register() {
         password: formData.password,
       });
 
+      showToast({
+        type: "success",
+        title: "Account created",
+        message: "A verification code has been sent to your email.",
+      });
       navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`);
     } catch (err) {
       const message = err?.response?.data?.message || "Registration failed";
-      alert(message);
+      showToast({ type: "error", title: "Registration failed", message });
     } finally {
       setLoading(false);
     }

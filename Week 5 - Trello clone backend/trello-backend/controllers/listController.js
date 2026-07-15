@@ -1,7 +1,7 @@
 const listService = require(
   "../services/listService"
 );
-const sendResponse = require("../utils/response");
+const sendResponse = require("../utils/Response");
 
 const createList = async (
   req,
@@ -31,21 +31,23 @@ const createList = async (
 
 const getLists = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
 
     const lists =
       await listService.getLists();
 
-    res.status(200).json(lists);
-
-  } catch (error) {
-
-    res.status(500).json({
-      message: error.message,
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Lists fetched successfully",
+      data: lists,
     });
 
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -53,7 +55,8 @@ const getLists = async (
 
 const getListsByBoard = async (
   req,
-  res
+  res,
+  next
 ) => {
   try {
 
@@ -63,18 +66,15 @@ const getListsByBoard = async (
         req.user._id
       );
 
-    res.status(200).json({
-      message:
-        "Lists fetched successfully",
+    return sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: "Lists fetched successfully",
       data: lists,
     });
 
   } catch (error) {
-
-    res.status(404).json({
-      message: error.message,
-    });
-
+    next(error);
   }
 };
 
