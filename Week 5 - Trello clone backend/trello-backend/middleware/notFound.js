@@ -1,5 +1,5 @@
 const sendResponse = require(
-  "../utils/response"
+  "../utils/Response"
 );
 
 const notFound = (

@@ -63,6 +63,9 @@ router.delete(
   "/all",
   protect,
   roleMiddleware("admin"),
+  (req, res) => {
+    res.status(200).json({ message: "Admin route - delete all users" });
+  }
 );
 
 module.exports = router;

@@ -23,7 +23,7 @@
 // module.exports = errorHandler;
 
 const sendResponse = require(
-  "../utils/response"
+  "../utils/Response"
 );
 
 const errorHandler = (
